@@ -9,7 +9,8 @@
 - IMDb crawler: 
 1. Crawl movies tag information from IMDb by IMDb number provided by movielens.
 2. Clean and generate different kinds of data used by later steps. *(All of the following information contains 1M and 20M movielens data, only use 20M movielens as example. Detailed data information can be found here [data overview](https://github.com/clamli/Content-based-decision-tree/blob/master/IMDb%20crawler/data_overview.ipynb).)*
-	**1) Movies year information:**
+
+   **1) Movies year information:**
    ```
    dict { 
    		movieid(str) : year(int) 
