@@ -1,14 +1,10 @@
-function [distance] = dist(i, j)
+function [distance] = dist(i, j, mean_i, mean_j)
 % size_i = size(find(i),2);
 % size_j = size(find(j),2);
 % if size_i == 0 || size_j == 0
 %     print('cold user!')
 %     ppc = 0;
 % else
-% mean_i = full(sum(i(:)))/size(find(i),2);
-% mean_j = full(sum(j(:)))/size(find(j),2);
-mean_i = mean(i(i~=0));
-mean_j = mean(j(j~=0));
 lap = find(i .* j);
 if size(lap, 2) == 0
     ppc = 0;
