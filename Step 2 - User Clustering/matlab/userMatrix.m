@@ -1,8 +1,9 @@
-rating_matrix = load('sparse_matrix_ml-latest.mat');
-meanAll = load('mean_all.mat');
-mean_all = meanAll.mean_all;
-[rowNum, colNum] = size(rating_matrix.content);
-rating_matrix_tenth = full(rating_matrix.content(2:int32(rowNum * 0.1), find(sum(rating_matrix.content))));
+rating_matrix = load('../data/sparse_matrix_ml-latest.mat');
+rating_matrix = rating_matrix.content(1:size(rating_matrix.content,1),:);
+mean_all = load('../data/mean_all.mat');
+mean_all = mean_all.mean_all;
+[userNum, itemNum] = size(rating_matrix);
+rating_matrix_tenth = rating_matrix(1:int32(userNum*0.1),find(sum(rating_matrix)));
 
 userDist_m = zeros(int32(rowNum * 0.1),int32(rowNum * 0.1));
 totalNum = int32(rowNum * 0.1)^2
