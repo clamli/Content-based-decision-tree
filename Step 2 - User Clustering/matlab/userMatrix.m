@@ -9,11 +9,9 @@ userDist_m = zeros(int32(rowNum * 0.1),int32(rowNum * 0.1));
 totalNum = int32(rowNum * 0.1)^2
 k = 0
 for i = 1 : int32(rowNum * 0.1) - 1
-    for j = 1 : int32(rowNum * 0.1) - 1
-        if mod(k, 1000)==0
-            disp(k)
-        end
-        k = k + 1;
-        userDist_m(i,j) = dist(rating_matrix_tenth(i,:),rating_matrix_tenth(j,:), mean_all(1,i), mean_all(1,j));
+    if mod(k, 1000)==0
+        disp(k)
     end
+    k = k + 1;
+    dist(rating_matrix_tenth(i,:),rating_matrix_tenth, mean_all);
 end

@@ -5,6 +5,7 @@ function [distance] = dist(i, j, mean_i, mean_j)
 %     print('cold user!')
 %     ppc = 0;
 % else
+
 lap = find(i .* j);
 if size(lap, 2) == 0
     ppc = 0;
