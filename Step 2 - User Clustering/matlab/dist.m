@@ -1,4 +1,4 @@
-function [distance] = dist(i, j, mean_i, mean_j)
+function [distance] = dist0d(i, j, mean_i, mean_j)
 % size_i = size(find(i),2);
 % size_j = size(find(j),2);
 % if size_i == 0 || size_j == 0
