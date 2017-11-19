@@ -1,8 +1,8 @@
 all = load('../data/decentralized_matrix.mat');
 all = all.decentralized_matrix;
 
-% distance = dist1d(1244, rating_matrix_tenth, mean_all)
-% 
+% distance = dist1d(1244, rating_matrix_tenth)
+
 all = single(full(all));
 disp('all DONE')
 

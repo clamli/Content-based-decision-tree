@@ -1,4 +1,4 @@
-function [distance] = dist1d(i, j, mean_i, mean_j)
+function [distance] = dist0d(i, j)
 % size_i = size(find(i),2);
 % size_j = size(find(j),2);
 % if size_i == 0 || size_j == 0
@@ -10,8 +10,8 @@ lap = find(i .* j);
 if size(lap, 2) == 0
     ppc = 0;
 else
-    lap_i = i(:,lap) - mean_i;
-    lap_j = j(:,lap) - mean_j;
+    lap_i = i(:,lap) - sum(i)/sum(i~=0);
+    lap_j = j(:,lap) - sum(j)/sum(j~=0);
     if sum(lap_i(:))==0 || sum(lap_j(:))==0
         ppc = 0;
     else
