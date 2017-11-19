@@ -38,5 +38,25 @@
    		movieid(str) : tags(str) 
    };
    ```
+- Step 3 - Item Similarity Information:
+	- Year information: 
+	```
+	{ movieid : year(int) }
+	```
+	- Genre information:
+	```
+	{ movieid : array() }
+	```
+	Every feature of the array is a certain genre.
+	- Title information:
+	```
+	sparse matrix: 3883x3940 (for 1M movielens)
+	sparse matrix: 45843x25632 (for 20M movielens)
+	```
+	- Tag information:
+	```
+	sparse matrix: 3883x16935 (for 1M movielens)
+	sparse matrix: 45843x42721 (for 20M movielens)
+	```
 #### Dependence
 - Python 3.5
