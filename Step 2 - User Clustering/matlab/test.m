@@ -1,24 +1,12 @@
-all = load('../data/decentralized_matrix.mat');
-all = all.decentralized_matrix;
+% rating_matrix = load('../data/sparse_matrix_ml-latest.mat');
+% rating_matrix = rating_matrix.UI_matrix(1:size(rating_matrix.UI_matrix,1),:);
+% [userNum, itemNum] = size(rating_matrix);
+% 
+% startPos = 1;
+% endPos = int32(userNum*0.1);
+% rating_matrix = rating_matrix(startPos:endPos,:);
+% i = rating_matrix(10638,:);
+% j = rating_matrix(210,:);
+% m = dist0d(i, j)
 
-% distance = dist1d(1244, rating_matrix_tenth)
-
-all = single(full(all));
-disp('all DONE')
-
-pcc_n = all * all';
-disp('pcc_n DONE')
-
-all_2 = all.^2 * (all'~=0);
-clear all
-disp('all_2 DONE')
-
-pcc_d = (all_2 .* all_2').^0.5 + 1e-9;
-clear all_2
-disp('pcc_d DONE')
-
-pcc = pcc_n ./ pcc_d;
-disp('pcc 3 DONE')
-
-distance = -pcc + 1;
-disp('distance DONE')
+dist2d(1)
