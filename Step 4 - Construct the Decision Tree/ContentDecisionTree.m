@@ -136,7 +136,7 @@ classdef ContentDecisionTree
             obj.tree(tree_bound_for_node(1):tree_bound_for_node(2)) = [dislike_array, mediocre_array, like_array];
             bound1 = tree_bound_for_node(1)+size(dislike_array, 2)-1;
             bound2 = bound1 + size(mediocre_array, 2);
-            bound3 = bound2 + size(like_array, 2)
+            bound3 = bound2 + size(like_array, 2);
             if size(obj.tree_bound, 2) < obj.cur_depth
                 obj.tree_bound{obj.cur_depth} = [tree_bound_for_node(1), bound1];
                 obj.tree_bound{obj.cur_depth} = [obj.tree_bound{obj.cur_depth}, [bound1+1, bound2]];
@@ -146,7 +146,8 @@ classdef ContentDecisionTree
                 obj.tree_bound{obj.cur_depth} = [obj.tree_bound{obj.cur_depth}, [bound1+1, bound2]];
                 obj.tree_bound{obj.cur_depth} = [obj.tree_bound{obj.cur_depth}, [bound2+1, bound3]];
             end
-            %% Children Node Recursion
+            
+            %% Child Nodes Recursion
             candidate_user_cluster_id(min_usr_cluster_id) = [];
             obj.generateDecisionTree(obj.tree_bound{obj.cur_depth}(end-2), candidate_user_cluster_id);    % dislike node
             obj.generateDecisionTree(obj.tree_bound{obj.cur_depth}(end-1), candidate_user_cluster_id);    % mediocre node
