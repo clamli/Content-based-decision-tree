@@ -1,7 +1,7 @@
 rating_matrix = load('../data/sparse_matrix_ml-latest.mat');
-rating_matrix = rating_matrix.content(2:size(rating_matrix.content,1),:);
+rating_matrix = rating_matrix.UI_matrix(1:size(rating_matrix.UI_matrix,1),:);
 [userNum, ~] = size(rating_matrix);
-decentralized_matrix = rating_matrix(1:int32(userNum*0.1),find(sum(rating_matrix)));
+decentralized_matrix = rating_matrix(1:int32(userNum*0.1),:);
 [~, itemNum] = size(decentralized_matrix);
 clear rating_matrix
 
