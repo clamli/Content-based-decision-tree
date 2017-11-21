@@ -1,22 +1,30 @@
-function [distance] = dist2d(i, j, mean_i, mean_j)
-% size_i = size(find(i),2);
-% size_j = size(find(j),2);
-% if size_i == 0 || size_j == 0
-%     print('cold user!')
-%     ppc = 0;
-% else
+function [] = dist2d(matrixNum)
+all_rm = load(['../data/decentralized_matrix_', num2str(matrixNum), '.mat']);
+all_rm = all_rm.decentralized_matrix;
 
-lap = find(i .* j);
-if size(lap, 2) == 0
-    ppc = 0;
-else
-    lap_i = i(:,lap) - mean_i;
-    lap_j = j(:,lap) - mean_j;
-    if sum(lap_i(:))==0 || sum(lap_j(:))==0
-        ppc = 0;
-    else
-        ppc = sum(lap_i .* lap_j)/((sum(lap_i.^2) * sum(lap_j.^2)).^0.5);
-    end
-end
-% end
-distance = 1 - ppc;
+all_rm = full(all_rm);
+disp('all DONE')
+
+pcc_n = all_rm * all_rm';
+disp('pcc_n DONE')
+
+all_2 = all_rm.^2 * (all_rm'~=0);
+clear all_rm
+disp('all_2 DONE')
+
+pcc_d = (all_2 .* all_2').^0.5 + 1e-9;
+clear all_2
+disp('pcc_d DONE')
+
+pcc = pcc_n ./ pcc_d;
+clear pcc_n
+clear pcc_d
+disp('pcc 3 DONE')
+
+distance = -pcc + 1;
+clear pcc
+disp('distance DONE')
+save(['../data/distance_', num2str(matrixNum), '.mat'],...
+'distance');
+disp('save DONE');
+    
