@@ -1,11 +1,12 @@
-%---------------------------------------------------------------
+function [cluster_cell] = k_medoid(i)
+distance = load(['../data/distance_', num2str(i),'.mat']);
+distance = distance.distance;
 userNum = size(distance, 1);
 K = 1000;
 max_iterations = 20;
 % centroids : [center1, center2, ... centerK] 
 random_index = randperm(userNum);
 centroids = sort(random_index(1 : K));
-init = centroids;
 clear random_index
 for time = 1 : max_iterations
     % get Closest Centroids

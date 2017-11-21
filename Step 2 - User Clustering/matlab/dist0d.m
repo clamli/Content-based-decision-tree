@@ -1,10 +1,4 @@
 function [distance] = dist0d(i, j)
-% size_i = size(find(i),2);
-% size_j = size(find(j),2);
-% if size_i == 0 || size_j == 0
-%     print('cold user!')
-%     ppc = 0;
-% else
 
 lap = find(i .* j);
 if size(lap, 2) == 0
