@@ -2,7 +2,7 @@ function [] = dist2d(matrixNum)
 all_rm = load(['../data/decentralized_matrix_', num2str(matrixNum), '.mat']);
 all_rm = all_rm.decentralized_matrix;
 
-all_rm = full(all_rm);
+all_rm = single(full(all_rm));
 disp('all DONE')
 
 pcc_n = all_rm * all_rm';
@@ -19,7 +19,7 @@ disp('pcc_d DONE')
 pcc = pcc_n ./ pcc_d;
 clear pcc_n
 clear pcc_d
-disp('pcc 3 DONE')
+disp('pcc DONE')
 
 distance = -pcc + 1;
 clear pcc
