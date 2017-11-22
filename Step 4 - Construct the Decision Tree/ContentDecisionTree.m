@@ -32,16 +32,16 @@ classdef ContentDecisionTree
             obj.UI_matrix = UI_matrix_str.UI_matrix;
         end
         function loadSimilarityMatrix(obj)      
-            Genre_str = load('');     % Load Genre Matrix Struct
+            Genre_str = load('./genre_matrix_44480_44480.mat');     % Load Genre Matrix Struct
             genre_sim_matrix = Genre_str.genre_matrix;
             clear Genre_str;
-            Tag_str = load('');       % Load Tag Matrix Struct
+            Tag_str = load('./tag_matrix_44480_44480.mat');       % Load Tag Matrix Struct
             tag_sim_matrix = Tag_str.tag_matrix;
             clear Tag_str;
-            Title_str = load('');     % Load Genre Matrix Struct
+            Title_str = load('./title_matrix_44480_44480.mat');     % Load Genre Matrix Struct
             title_sim_matrix = Title_str.title_matrix;
             clear Title_str;
-            Year_str = load('');      % Load Genre Matrix Struct
+            Year_str = load('./year_matrix_44480_44480.mat');      % Load Genre Matrix Struct
             year_sim_matrix = Year_str.title_matrix;
             clear Year_str;
             obj.item_sim_matrix = ...
@@ -65,7 +65,7 @@ classdef ContentDecisionTree
             obj.depth_threshold = threshold;
         end
         function loadUserCluster(obj)
-            user_cluster_str = load('');
+            user_cluster_str = load('./user_cluster_cell.mat');
             obj.user_cluster = user_cluster_str.user_cluster_cell;
             clear user_cluster_str
             obj.user_cluster_number = size(obj.user_cluster, 2);

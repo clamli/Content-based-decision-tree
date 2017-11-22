@@ -47,7 +47,6 @@
 	```
 	{ movieid : array() }
 	```
-	Every feature of the array is a certain genre.
 	- Title information:
 	```
 	sparse matrix: 3883x3940 (for 1M movielens)
