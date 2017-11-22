@@ -58,5 +58,8 @@
 	sparse matrix: 3883x16935 (for 1M movielens)
 	sparse matrix: 45843x42721 (for 20M movielens)
 	```
+- Step 4 - Contruct Content-based Decision Tree
 #### Dependence
-- Python 3.5
+- Matlab R2013a
+- Python 3.5/3.6
+- Jupytor Notebook
