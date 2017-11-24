@@ -8,7 +8,7 @@
 % j = rating_matrix(210,:);
 % m = dist0d(i, j)
 
-dist2d(1)
+% dist2d(1)
 dist2d(2)
 dist2d(3)
 dist2d(4)
