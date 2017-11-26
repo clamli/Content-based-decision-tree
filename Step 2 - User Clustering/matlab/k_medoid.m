@@ -1,4 +1,4 @@
-function [cluster_cell] = k_medoid(i)
+function [user_cluster_cell] = k_medoid(i)
 distance = load(['../data/distance_', num2str(i),'.mat']);
 distance = distance.distance;
 userNum = size(distance, 1);
@@ -31,8 +31,8 @@ for time = 1 : max_iterations
         centroids = centroids_update;
     end
 end
-cluster_cell = cell(1, K);
+user_cluster_cell = cell(1, K);
 for i = 1 : K
     cluster = find(indices==centroids(i));
-    cluster_cell{i} = cluster;
+    user_cluster_cell{i} = cluster;
 end
