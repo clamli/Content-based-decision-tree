@@ -37,7 +37,7 @@ classdef ContentDecisionTree<handle
             item_num = size(obj.UI_matrix, 2);
             % user_num = size(obj.UI_matrix, 1);
             obj.tree = uint32(linspace(1, item_num, item_num));
-            obj.tree_bound{obj.cur_depth} = [1, item_num];
+            obj.tree_bound{obj.cur_depth} = {[1, item_num]};
             % obj.user_id = uint32(linspace(1, user_num, user_num));
         end
         function loadSimilarityMatrix(obj)      
@@ -129,7 +129,8 @@ classdef ContentDecisionTree<handle
             %% Calculate Score            
             % Generated Rating Matrix
             generated_rating_matrix = (obj.UI_matrix(id_array, item_in_node) == 0) .* (obj.UI_matrix(id_array, :)*obj.item_sim_matrix(:, item_in_node));
-            generated_rating_matrix = (generated_rating_matrix' / diag(sum(obj.UI_matrix(id_array, :) ~= 0, 2)))';
+            % generated_rating_matrix = (generated_rating_matrix' / diag(sum(obj.UI_matrix(id_array, :) ~= 0, 2)))';
+            generated_rating_matrix = (generated_rating_matrix) ./ ((obj.UI_matrix(id_array, :) ~= 0) * obj.item_sim_matrix(:, item_in_node));
             
             % Whole Rating Matrix
             rating_for_item_in_node = obj.UI_matrix(id_array, item_in_node) + generated_rating_matrix;
