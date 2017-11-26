@@ -1,7 +1,12 @@
 
 lambdas = [0.01,0.02,0.04,0.08,0.16,0.32,0.64,1.28,2.56,5.12,10.24,20.48,40.96,81.92];
 
-load('../../Step 2 - User Clustering/data/UI_matrix_1.mat');
+% load('../../Step 2 - User Clustering/data/UI_matrix_1.mat');
+load('../data/data_full.mat');
+load('../data/test_all.mat');
+load('../data/train_all.mat');
+R = L_train;
+Y = Rating_train;
 
 % index = single(find(UI_matrix));
 % random_index = single(randperm(length(index)));
@@ -11,19 +16,12 @@ load('../../Step 2 - User Clustering/data/UI_matrix_1.mat');
 % Y = zeros(size(UI_matrix));
 % Y(train) = UI_matrix(train);
 % Y = single(Y);
-Y = sparse(Y);
-R = Y~=0;
+% Y = sparse(Y);
 
 % test_Y = zeros(size(UI_matrix));
 % test_Y(test) = UI_matrix(test);
 % test_Y = single(test_Y);
-test_Y = sparse(test_Y);
-test_R = test_Y~=0;
-
-% load('../data/test_all.mat');
-% load('../data/train_all.mat');
-% R = L_train;
-% Y = Rating_train;
+% test_Y = sparse(test_Y);
 
 error_rate = zeros(length(lambdas),1);
 disp('matrix split DONE')
