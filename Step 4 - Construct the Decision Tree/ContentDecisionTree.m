@@ -32,8 +32,8 @@ classdef ContentDecisionTree<handle
     
     methods
         function loadUIRatingMatrix(obj)
-            UI_matrix_str = load('./sub_rating_matrix.mat');
-            obj.UI_matrix = single(full(UI_matrix_str.sub_rating_matrix));
+            UI_matrix_str = load('./UI_matrix_1_train.mat');
+            obj.UI_matrix = single(full(UI_matrix_str.UI_matrix));
             item_num = size(obj.UI_matrix, 2);
             % user_num = size(obj.UI_matrix, 1);
             obj.tree = uint32(linspace(1, item_num, item_num));
@@ -71,8 +71,8 @@ classdef ContentDecisionTree<handle
                 obj.alpha_year = param4;
                 obj.loadSimilarityMatrix();
             else
-                similarity_matrix_str = load('item_sim_matrix_44480_44480.mat');
-                obj.item_sim_matrix = similarity_matrix_str.item_sim_matrix;
+                similarity_matrix_str = load('item_sim_matrix_31136_31136.mat');
+                obj.item_sim_matrix = similarity_matrix_str.item_sim_matrix_31136_31136;
                 clear similarity_matrix_str;
             end
         end
@@ -83,9 +83,8 @@ classdef ContentDecisionTree<handle
             end
         end
         function loadUserCluster(obj)
-            user_cluster_str = load('./user_cluster_cell.mat');
-            obj.user_cluster = user_cluster_str.user_cluster_cell;
-            obj.user_cluster = obj.user_cluster(1:10);
+            user_cluster_str = load('./chosen_user_cluster_cell.mat');
+            obj.user_cluster = user_cluster_str.chosen_user_cluster_cell;
             clear user_cluster_str
             obj.user_cluster_id = uint32(linspace(1, size(obj.user_cluster, 2), size(obj.user_cluster, 2)));
             for i = 1:size(obj.user_cluster, 2)
@@ -122,7 +121,7 @@ classdef ContentDecisionTree<handle
                 rear = size(userid, 2) + front - 1;
                 index_cell{i} = linspace(front, rear, size(userid, 2)); 
                 id_array(front:rear) = userid;
-                front = front + size(userid, 2);
+                front = rear + 1;
             end
             %fprintf('    Preparation finished!\n');
             
@@ -135,7 +134,7 @@ classdef ContentDecisionTree<handle
             % Whole Rating Matrix
             rating_for_item_in_node = obj.UI_matrix(id_array, item_in_node) + generated_rating_matrix;
             clear generated_rating_matrix;
-            % save('./rating_for_item_in_node.mat', 'rating_for_item_in_node', '-v7.3');
+            save('./rating_for_item_in_node.mat', 'rating_for_item_in_node', '-v7.3');
             %fprintf('    Calculate score finished!\n');
                
             %% Calculate Error
@@ -143,13 +142,16 @@ classdef ContentDecisionTree<handle
             min_error = -1;
             for i = 1:num_candidate_cluster
                 item_average_rating = mean(rating_for_item_in_node(index_cell{i}, :), 1);
-                dislike_array = tmp_UI_matrix_in_node(:, item_average_rating < 2.5);
-                mediocre_array = tmp_UI_matrix_in_node(:, item_average_rating >= 2.5 & item_average_rating <= 3.5);
+                dislike_array = tmp_UI_matrix_in_node(:, item_average_rating < 3);
+                mediocre_array = tmp_UI_matrix_in_node(:, item_average_rating >= 3 & item_average_rating <= 3.5);
                 like_array = tmp_UI_matrix_in_node(:, item_average_rating > 3.5);
                 error = sum(sum(dislike_array.^2, 2)-(sum(dislike_array, 2).^2)./(sum(dislike_array~=0, 2)+1e-9)) + ...
                     sum(sum(mediocre_array.^2, 2)-(sum(mediocre_array, 2).^2)./(sum(mediocre_array~=0, 2)+1e-9)) + ...
                     sum(sum(like_array.^2, 2)-(sum(like_array, 2).^2)./(sum(like_array~=0, 2)+1e-9));
+                fprintf('cluster id: %d\n', i);
+                fprintf('index_cell: %d\n', size(index_cell{i}));
                 fprintf('%.2f        %.2f\n', error, min_error);
+                fprintf('%d, %d, %d\n', size(dislike_array, 2), size(mediocre_array, 2), size(like_array, 2));
                 if min_error == -1 || error < min_error
                     min_error = error;
                     min_usr_cluster_id = i;
@@ -165,8 +167,8 @@ classdef ContentDecisionTree<handle
             %% Assign Children Node
             %disp(min_item_average_rating);
             %disp(size(item_in_node));
-            dislike_array = item_in_node(min_item_average_rating < 2.5);
-            mediocre_array = item_in_node(min_item_average_rating >= 2.5 & min_item_average_rating <= 3.5);
+            dislike_array = item_in_node(min_item_average_rating < 3);
+            mediocre_array = item_in_node(min_item_average_rating >= 3 & min_item_average_rating <= 3.5);
             like_array = item_in_node(min_item_average_rating > 3.5);
 %             disp(size(obj.tree(tree_bound_for_node(1):tree_bound_for_node(2))));
 %             disp(size(dislike_array));
@@ -272,7 +274,7 @@ classdef ContentDecisionTree<handle
         end
         
         function buildTree(obj)
-            obj.generateDecisionTree(obj.tree_bound{1}, obj.user_cluster_id, obj.candi_user_num);
+            obj.generateDecisionTree(obj.tree_bound{1}{1}, obj.user_cluster_id, obj.candi_user_num);
         end
     end
     
