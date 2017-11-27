@@ -142,9 +142,9 @@ classdef ContentDecisionTree<handle
             min_error = -1;
             for i = 1:num_candidate_cluster
                 item_average_rating = mean(rating_for_item_in_node(index_cell{i}, :), 1);
-                dislike_array = tmp_UI_matrix_in_node(:, item_average_rating < 3);
-                mediocre_array = tmp_UI_matrix_in_node(:, item_average_rating >= 3 & item_average_rating <= 3.5);
-                like_array = tmp_UI_matrix_in_node(:, item_average_rating > 3.5);
+                dislike_array = tmp_UI_matrix_in_node(:, item_average_rating <= 3.61);
+                mediocre_array = tmp_UI_matrix_in_node(:, item_average_rating > 3.61 & item_average_rating <= 3.63);
+                like_array = tmp_UI_matrix_in_node(:, item_average_rating > 3.63);
                 error = sum(sum(dislike_array.^2, 2)-(sum(dislike_array, 2).^2)./(sum(dislike_array~=0, 2)+1e-9)) + ...
                     sum(sum(mediocre_array.^2, 2)-(sum(mediocre_array, 2).^2)./(sum(mediocre_array~=0, 2)+1e-9)) + ...
                     sum(sum(like_array.^2, 2)-(sum(like_array, 2).^2)./(sum(like_array~=0, 2)+1e-9));
@@ -167,9 +167,9 @@ classdef ContentDecisionTree<handle
             %% Assign Children Node
             %disp(min_item_average_rating);
             %disp(size(item_in_node));
-            dislike_array = item_in_node(min_item_average_rating < 3);
-            mediocre_array = item_in_node(min_item_average_rating >= 3 & min_item_average_rating <= 3.5);
-            like_array = item_in_node(min_item_average_rating > 3.5);
+            dislike_array = item_in_node(min_item_average_rating <= 3.61);
+            mediocre_array = item_in_node(min_item_average_rating > 3.61 & min_item_average_rating <= 3.63);
+            like_array = item_in_node(min_item_average_rating >= 3.63);
 %             disp(size(obj.tree(tree_bound_for_node(1):tree_bound_for_node(2))));
 %             disp(size(dislike_array));
 %             disp(size(mediocre_array));
