@@ -6,14 +6,14 @@ random_index = single(randperm(itemNum));
 train_list = random_index(1 : round(itemNum * 0.7));
 test_list  = random_index(round(itemNum * 0.7) + 1 : end);
 
-save('../data/train_list.mat','train_list');
-save('../data/test_list.mat','test_list');
+save('../data/train_list.mat', 'train_list');
+save('../data/test_list.mat', 'test_list');
 
 rating_matrix_train = rating_matrix(:, train_list);
 UI_matrix_test      = rating_matrix(:, test_list);
 startPos = 1;
 endPos = int32(userNum*0.1);
-save(['../data/UI_matrix_test.mat'], 'UI_matrix_test');
+save('../data/UI_matrix_test.mat', 'UI_matrix_test');
 disp(full(sum(sum(UI_matrix_test~=0)))/27000000);
 for i = 1:10
     disp([num2str(i), 'th:'])
