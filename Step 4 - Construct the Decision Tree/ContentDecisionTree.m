@@ -3,6 +3,7 @@ classdef ContentDecisionTree<handle
     properties
         % U*I Rating sparse Matrix
         UI_matrix;    
+        generated_rating_matrix;
         
         % Similarity Matrix
         item_sim_matrix;    % Similarity Matrix for movie genres
@@ -97,6 +98,10 @@ classdef ContentDecisionTree<handle
        
             obj.loadUserCluster();
             disp('Load User Cluster Done!');
+            
+            obj.generated_rating_matrix = (obj.UI_matrix(:, :) == 0) .* (obj.UI_matrix(:, :)*obj.item_sim_matrix(:, :));
+            obj.generated_rating_matrix = (obj.generated_rating_matrix) ./ ((obj.UI_matrix(:, :) ~= 0) * obj.item_sim_matrix(:, :));
+            disp('Generated Matrix Done!');
         end
         
         
@@ -126,16 +131,15 @@ classdef ContentDecisionTree<handle
             %fprintf('    Preparation finished!\n');
             
             %% Calculate Score            
-            % Generated Rating Matrix
-            generated_rating_matrix = (obj.UI_matrix(id_array, item_in_node) == 0) .* (obj.UI_matrix(id_array, :)*obj.item_sim_matrix(:, item_in_node));
-            % generated_rating_matrix = (generated_rating_matrix' / diag(sum(obj.UI_matrix(id_array, :) ~= 0, 2)))';
-            generated_rating_matrix = (generated_rating_matrix) ./ ((obj.UI_matrix(id_array, :) ~= 0) * obj.item_sim_matrix(:, item_in_node));
+%             % Generated Rating Matrix
+%             generated_rating_matrix = (obj.UI_matrix(id_array, item_in_node) == 0) .* (obj.UI_matrix(id_array, :)*obj.item_sim_matrix(:, item_in_node));
+%             % generated_rating_matrix = (generated_rating_matrix' / diag(sum(obj.UI_matrix(id_array, :) ~= 0, 2)))';
+%             generated_rating_matrix = (generated_rating_matrix) ./ ((obj.UI_matrix(id_array, :) ~= 0) * obj.item_sim_matrix(:, item_in_node));
             
-            % Whole Rating Matrix
-            rating_for_item_in_node = obj.UI_matrix(id_array, item_in_node) + generated_rating_matrix;
-            clear generated_rating_matrix;
-            save('./rating_for_item_in_node.mat', 'rating_for_item_in_node', '-v7.3');
-            %fprintf('    Calculate score finished!\n');
+            rating_for_item_in_node = obj.UI_matrix(id_array, item_in_node) + obj.generated_rating_matrix(id_array, item_in_node);
+            % clear generated_rating_matrix;
+            % save('./rating_for_item_in_node.mat', 'rating_for_item_in_node', '-v7.3');
+            % fprintf('    Calculate score finished!\n');
                
             %% Calculate Error
             tmp_UI_matrix_in_node = obj.UI_matrix(:, item_in_node);
