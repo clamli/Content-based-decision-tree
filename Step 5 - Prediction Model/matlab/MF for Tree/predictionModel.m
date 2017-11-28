@@ -24,7 +24,7 @@ lambdas = [0.01, 0.02, 0.04, 0.08, ...
            2.56, 5.12, 10.24, 20.48, ...
            40.96,81.92];
 error_rate = zeros(length(lambdas),1);
-for i=1:length(lambdas)
+for i = 1 : length(lambdas)
     %%%%%%%%%%%%%%%%% Generate MF Model %%%%%%%%%%%%%%%%%%%%%
     lambda = lambdas(i);    
     rank = 70;
@@ -32,12 +32,12 @@ for i=1:length(lambdas)
     P = mf_resys_func(pseudo_matrix, pseudo_matrix~=0, rank, lambda);
     %%%%%%%%%%%%%%%%% Calculate RMSE on Test Set %%%%%%%%%%%%%%%%%%%%%
     P_test = single(zeros(size(UI_matrix_test_1)));
-    for i = 1 : item_num_test
-        level = test_item_node_id{i}(1);
-        nodeId = test_item_node_id{i}(2); 
+    for j = 1 : item_num_test
+        level = test_item_node_id{j}(1);
+        nodeId = test_item_node_id{j}(2); 
         pseudo_item = dtmodel.tree_bound{level}(nodeId);
-        j = find(ismember(pseudo_items,num2str(pseudo_item{1})));
-        P_test(:, i) = P(:, j);
+        m = find(ismember(pseudo_items,num2str(pseudo_item{1})));
+        P_test(:, j) = P(:, m);
     end
     P_test = P_test .* (UI_matrix_test_1~=0);
     rmse_error =...
@@ -46,13 +46,12 @@ for i=1:length(lambdas)
     
     fprintf('lambda %f | RMSE: %f\n',lambda, error_rate(i));
 end
+save('../../data/error_rate.mat','error_rate');
 plot(lambdas, error_rate,'-o');
 ylabel('RMSE');
 xlabel('\lambda');
 set(gca, 'xscale', 'log');
 set(gcf, 'Color' , 'w'  );
-
-clear pseudo_matrix
 
 
 
