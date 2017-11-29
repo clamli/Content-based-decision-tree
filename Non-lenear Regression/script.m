@@ -41,3 +41,8 @@ rs = callInput_denominator( UI_Matrix, genre_matrix, train, test );
 save('genre_den.mat', 'rs', '-v7.3');
 clear genre_matrix
 disp('genre done!')
+
+%% real rating
+real_rating = UI_Matrix(UI_Matrix(:, test)~=0);
+save('real_rating.mat', 'real_rating', '-v7.3');
+disp('real rating done!')
