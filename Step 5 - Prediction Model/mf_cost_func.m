@@ -1,4 +1,4 @@
-function [J,grad] = cost_func(obj, Y, R, rank, lambda )
+function [J, grad] = cost_func(obj, Y, R, rank, lambda )
 %   J:      cost
 %   grad:   gradient
     
@@ -11,12 +11,12 @@ function [J,grad] = cost_func(obj, Y, R, rank, lambda )
 %     disp('temp DONE')
     
     J = 1/2 * sum(sum(temp.^2))...
-            + lambda/2 * sum(sum(user_vectors.^2)) ...
-            + lambda/2 * sum(sum(item_vectors.^2));
+		+ lambda/2 * sum(sum(user_vectors.^2)) ...
+		+ lambda/2 * sum(sum(item_vectors.^2));
 %     disp('J DONE')
     
-    item_grad =  temp   * user_vectors + lambda * item_vectors;
-    user_grad =  temp'  * item_vectors + lambda * user_vectors;
+    item_grad =  temp  * user_vectors + lambda * item_vectors;
+    user_grad =  temp' * item_vectors + lambda * user_vectors;
 %     disp('Grad DONE')
     
     grad = [item_grad(:); user_grad(:)];

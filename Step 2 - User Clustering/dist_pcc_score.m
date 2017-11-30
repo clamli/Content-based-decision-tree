@@ -1,4 +1,4 @@
-function [] = dist2d(matrixNum)
+function [] = dist_pcc(matrixNum)
 all_rm = load(['../data/decentralized_matrix_', num2str(matrixNum), '.mat']);
 all_rm = all_rm.decentralized_matrix;
 
