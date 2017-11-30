@@ -1,4 +1,4 @@
-function [ test_item_node_id ] = getTargetNode( item_cluster_rating_matrix, split_cluster, tree_bound )
+function [ test_item_node_id ] = getTargetNode( item_cluster_rating_matrix, split_cluster, tree_bound, interval_bound )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
     
@@ -12,21 +12,23 @@ function [ test_item_node_id ] = getTargetNode( item_cluster_rating_matrix, spli
         level = 1;
         for j = 1:split_cluster_num            
             mean_ = item_cluster_rating_matrix(split_cluster{j}(ind), i);
-            if mean_ <= 3.61
+            interval1 = interval_bound{j}{ind}(1);
+            interval2 = interval_bound{j}{ind}(2);
+            if mean_ <= interval1
                 next_ind = (ind-1) * 3 + 1;
                 if tree_bound{j+1}{next_ind}(1) <= tree_bound{j+1}{next_ind}(2)
                     ind = next_ind;
                 else
                     break;
                 end
-            elseif mean_ > 3.61 && mean_ <= 3.63
+            elseif mean_ > interval1 && mean_ <= interval2
                 next_ind = (ind-1) * 3 + 2;
                 if tree_bound{j+1}{next_ind}(1) <= tree_bound{j+1}{next_ind}(2)
                     ind = next_ind;
                 else
                     break;
                 end
-            else 
+            elseif mean_ > interval2
                 next_ind = (ind-1) * 3 + 3;
                 if tree_bound{j+1}{next_ind}(1) <= tree_bound{j+1}{next_ind}(2)
                     ind = next_ind;
