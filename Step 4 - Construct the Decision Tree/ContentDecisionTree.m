@@ -179,7 +179,7 @@ classdef ContentDecisionTree<handle
             %disp(size(item_in_node));
             dislike_array = item_in_node(min_item_average_rating <= min_interval1);
             mediocre_array = item_in_node(min_item_average_rating > min_interval1 & min_item_average_rating <= min_interval2);
-            like_array = item_in_node(min_item_average_rating >= min_interval2);
+            like_array = item_in_node(min_item_average_rating > min_interval2);
 %             disp(size(obj.tree(tree_bound_for_node(1):tree_bound_for_node(2))));
 %             disp(size(dislike_array));
 %             disp(size(mediocre_array));
