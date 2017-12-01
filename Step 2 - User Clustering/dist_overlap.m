@@ -1,7 +1,4 @@
-function [] = dist_overlap(matrixNum)
-all_rm = load(['../data/UI_matrix_', num2str(matrixNum), '_train.mat']);
-all_rm = all_rm.UI_matrix;
-
+function [distance] = dist_overlap(all_rm)
 all_rm = single(full(all_rm));
 disp('all DONE')
 
@@ -20,8 +17,4 @@ distance =  - nomi ./ deno_2;
 clear nomi
 clear deno_2
 disp('distance DONE')
-
-save(['../data/overlap_', num2str(matrixNum), '.mat'],...
-'distance');
-disp('save DONE');
     

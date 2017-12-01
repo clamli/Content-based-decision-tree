@@ -1,8 +1,7 @@
-function [user_cluster_cell] = k_medoid(distance, i)
+function [user_cluster_cell] = k_medoid(distance, K)
 % distance = load(['../data/distance_', num2str(i),'.mat']);
 % distance = distance.distance;
 userNum = size(distance, 1);
-K = 1000;
 max_iterations = 20;
 % centroids : [center1, center2, ... centerK] 
 random_index = randperm(userNum);
