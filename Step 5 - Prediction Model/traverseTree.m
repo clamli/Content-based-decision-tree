@@ -1,4 +1,6 @@
-function [ pseudo_items ] = traverseTree(tree_bound, level, nodeNum, isParentCounted)
+function [ pseudo_items ] =...
+   traverseTree(tree_bound,...
+                level, nodeNum, isParentCounted, desiredDepth)
 pseudo_items = cell(1, 0);
 emptyNum = 0;
 if level == 1
@@ -22,8 +24,8 @@ for i = 3 * nodeNum - 2 : 3 * nodeNum
         else
             continue
         end
-    elseif level < 9    
-        pseudo_items = [pseudo_items, traverseTree(tree_bound, level + 1, i, 0)];
+    elseif level < desiredDepth - 1    
+        pseudo_items = [pseudo_items, traverseTree(tree_bound, level + 1, i, 0, desiredDepth)];
     % leaf node
     else 
         pseudo_items = [pseudo_items, currentNode];
