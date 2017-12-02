@@ -1,12 +1,11 @@
-% load('data/tree_bound.mat')
-UI_matrix_train = load('../Step 2 - User Clustering/data/UI_matrix/UI_matrix_1_train.mat');
-UI_matrix_train = UI_matrix_train.UI_matrix;
-UI_matrix_test = load('../Step 2 - User Clustering/data/UI_matrix/UI_matrix_1_test.mat');
-UI_matrix_test = UI_matrix_test.UI_matrix;
-% load('data/test_item_node_id.mat');
+%% Load
+% load tree_bound
+% load UI_matrix_train & UI_matrix_test
+% load test_item_node_id (target node info);
 
 %% Get Leaf nodes of Decision Tree
-pseudo_items = traverseTree(tree_bound, 1, 1, 0, 7)';
+chosenDepth = 4
+pseudo_items = traverseTree(tree_bound, 1, 1, 0, chosenDepth)';
 
 [user_num, ~] = size(UI_matrix_train);
 pseudo_item_num = length(pseudo_items);
@@ -28,6 +27,7 @@ lambdas = [0.000625, 0.00125, 0.0025, ...
            0.16,  0.32,  0.64,  1.28,  2.56, ...
            5.12, 10.24, 20.48, 40.96, 81.92];
 error_rate = zeros(length(lambdas),1);
+
 for i = 1 : length(lambdas)
     %% Generate MF Model
     lambda = lambdas(i);    
@@ -36,6 +36,8 @@ for i = 1 : length(lambdas)
     chosen_train = pseudo_matrix;
     chosen_test  = UI_matrix_test;
     P = mf_resys_func(chosen_train, chosen_train~=0, rank, lambda);
+    P(P>5) = 5;
+    P(P<0) = 0;
     %% Calculate RMSE on Test Set
     P_test = single(zeros(size(chosen_test)));
     for j = 1 : item_num_test
