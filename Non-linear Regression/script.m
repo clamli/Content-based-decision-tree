@@ -1,12 +1,9 @@
+%% Load
+% load four feature similarity matrix
 name = '1m';
 load(['../Step 2 - User Clustering/data/sparse_matrix_ml-',...
         name, '.mat'])
 [~, itemNum] = size(UI_matrix);
-% For large dataset, pick 10% users here.
-% For 1m dataset, pick all the users
-UI_matrix = single(full(UI_matrix));
-% Eliminate users who don't have rating within train items.
-UI_matrix = UI_matrix(sum(UI_matrix(:, train),2)~=0, :);
 
 item_id_random = randperm(itemNum);
 
@@ -15,8 +12,12 @@ save(['data/', name, '/train.mat'], 'train', '-v7.3');
 test = item_id_random(round(itemNum * 0.7) + 1:end);
 save(['data/', name, '/test.mat'], 'test', '-v7.3');
 
+% For large dataset, pick 10% users here.
+% For 1m dataset, pick all the users
+UI_matrix = single(full(UI_matrix));
+% Eliminate users who don't have rating within train items.
+UI_matrix = UI_matrix(sum(UI_matrix(:, train),2)~=0, :);
 %% title
-% load('data/title_matrix_44480_44480.mat')
 rs = calInput_nominator( UI_matrix, title_matrix, train, test );
 save(['data/', name, '/title.mat'], 'rs', '-v7.3');
 rs = calInput_denominator( UI_matrix, title_matrix, train, test );
@@ -25,7 +26,6 @@ clear title_matrix
 disp('title done!')
 
 %% tag
-% load('data/tag_matrix_44480_44480.mat')
 rs = calInput_nominator( UI_matrix, tag_matrix, train, test );
 save(['data/', name, '/tag.mat'], 'rs', '-v7.3');
 rs = calInput_denominator( UI_matrix, tag_matrix, train, test );
@@ -34,7 +34,6 @@ clear tag_matrix
 disp('tag done!')
 
 %% year
-% load('data/year_matrix_44480_44480.mat')
 rs = calInput_nominator( UI_matrix, year_matrix, train, test );
 save(['data/', name, '/year.mat'], 'rs', '-v7.3');
 rs = calInput_denominator( UI_matrix, year_matrix, train, test );
@@ -43,7 +42,6 @@ clear year_matrix
 disp('year done!')
 
 %% genre
-% load('data/genre_matrix_44480_44480.mat')
 rs = calInput_nominator( UI_matrix, genre_matrix, train, test );
 save(['data/', name, '/genre.mat'], 'rs', '-v7.3');
 rs = calInput_denominator( UI_matrix, genre_matrix, train, test );
