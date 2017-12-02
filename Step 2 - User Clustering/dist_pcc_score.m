@@ -1,6 +1,4 @@
-function [] = dist_pcc(matrixNum)
-all_rm = load(['../data/decentralized_matrix_', num2str(matrixNum), '.mat']);
-all_rm = all_rm.decentralized_matrix;
+function [distance] = dist_pcc_score(all_rm)
 
 all_rm = single(full(all_rm));
 disp('all DONE')
@@ -24,7 +22,4 @@ disp('pcc DONE')
 distance = -pcc + 1;
 clear pcc
 disp('distance DONE')
-save(['../data/distance_', num2str(matrixNum), '.mat'],...
-'distance');
-disp('save DONE');
     
