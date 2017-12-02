@@ -1,11 +1,27 @@
 %% Load
-% load tree_bound
+% load dt_model
 % load UI_matrix_train & UI_matrix_test
 % load test_item_node_id (target node info);
+% load UI_matrix_test
+% load item_sim_matrix
+% load test_list
 
+chosenDepth = 3;
+
+%% Find target node
+item_cluster_rating_matrix = generateItemClusRMatrix(...
+    dtmodel.user_cluster,...
+    item_sim_matrix(test_list, test_list),...
+    single(full(UI_matrix_test)));
+
+test_item_node_id  =getTargetNode(...
+     item_cluster_rating_matrix,...
+     {dtmodel.split_cluster{1:chosenDepth - 1}},...
+     {dtmodel.tree_bound{1:chosenDepth}}, ...
+     {dtmodel.interval_bound{1:chosenDepth}});
+ 
 %% Get Leaf nodes of Decision Tree
-chosenDepth = 4
-pseudo_items = traverseTree(tree_bound, 1, 1, 0, chosenDepth)';
+pseudo_items = traverseTree(dtmodel.tree_bound, 1, 1, 0, chosenDepth)';
 
 [user_num, ~] = size(UI_matrix_train);
 pseudo_item_num = length(pseudo_items);
@@ -43,7 +59,7 @@ for i = 1 : length(lambdas)
     for j = 1 : item_num_test
         level = test_item_node_id{j}(1);
         nodeId = test_item_node_id{j}(2); 
-        pseudo_item = tree_bound{level}(nodeId);
+        pseudo_item = dtmodel.tree_bound{level}(nodeId);
         m = find(ismember(pseudo_items, num2str(pseudo_item{1})));
         P_test(:, j) = P(:, m);
     end
