@@ -6,7 +6,7 @@ UI_matrix = UI_matrix_train;
 zero_users = find(sum(UI_matrix, 2)==0);
 
 % designate cluster number below
-clusters = k_medoid(distance, 300);
+clusters = k_medoid(distance, 700);
 for i = 1:length(clusters)
     for j = 1:length(clusters{i})
         if ismember(clusters{i}(j), zero_users)
@@ -20,4 +20,4 @@ for i = 1:length(clusters)
 end
 
 %% Save to file
-save(['data/clusters.mat'], 'clusters');
+save(['../20m tree/clusters.mat'], 'clusters');
