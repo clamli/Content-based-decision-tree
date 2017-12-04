@@ -1,7 +1,5 @@
 function [ test_item_node_id ] = getTargetNode( item_cluster_rating_matrix, split_cluster, tree_bound, interval_bound )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
-    
+   
     test_item_num = size(item_cluster_rating_matrix, 2);
     split_cluster_num = size(split_cluster, 2);
     test_item_node_id = cell(size(1, test_item_num));

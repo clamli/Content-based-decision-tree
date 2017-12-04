@@ -1,6 +1,7 @@
 %% load 
 % distance matrix
 % UI_matrix 
+name = '20m';
 UI_matrix = UI_matrix_train;
 %% eliminate users with zero ratings within training set
 zero_users = find(sum(UI_matrix, 2)==0);
@@ -20,4 +21,4 @@ for i = 1:length(clusters)
 end
 
 %% Save to file
-save(['../20m tree/clusters.mat'], 'clusters');
+save(['../', name, ' tree/clusters.mat'], 'clusters');

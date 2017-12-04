@@ -1,4 +1,4 @@
-name = '1m';
+name = '20m';
 
 A_title = load(['data/', name, '/title.mat']);
 A_title = A_title.rs;

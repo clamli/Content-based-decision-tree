@@ -14,7 +14,7 @@ test_item_node_id  =getTargetNode(...
      item_cluster_rating_matrix,...
      {dtmodel.split_cluster{1:chosenDepth - 1}},...
      {dtmodel.tree_bound{1:chosenDepth}}, ...
-     {dtmodel.interval_bound{1:chosenDepth}});
+     {dtmodel.interval_bound{1:chosenDepth - 1}});
  
 %% Get Leaf nodes of Decision Tree
 pseudo_items = traverseTree(dtmodel.tree_bound, 1, 1, 0, chosenDepth)';
@@ -69,11 +69,12 @@ end
 
 %% Save and plot
 plot(lambdas, error_rate,'-o');
-title(['Normal pcc clustering on tenth of 26m dataset, level', num2str(chosenDepth)])
+title(['Normal pcc clustering on tenth of 26m dataset, level ', num2str(chosenDepth)])
 ylabel('RMSE');
 xlabel('\lambda');
 set(gca, 'xscale', 'log');
 set(gcf, 'Color' , 'w'  );
+save(['../20m tree/error_rate_depth_', num2str(chosenDepth), '.mat'], 'error_rate');
 
 
 
