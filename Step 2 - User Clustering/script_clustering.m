@@ -1,12 +1,13 @@
 %% load 
 % distance matrix
 % UI_matrix 
+name = '20m';
 UI_matrix = UI_matrix_train;
 %% eliminate users with zero ratings within training set
 zero_users = find(sum(UI_matrix, 2)==0);
 
 % designate cluster number below
-clusters = k_medoid(distance, 300);
+clusters = k_medoid(distance, 700);
 for i = 1:length(clusters)
     for j = 1:length(clusters{i})
         if ismember(clusters{i}(j), zero_users)
@@ -20,4 +21,4 @@ for i = 1:length(clusters)
 end
 
 %% Save to file
-save(['data/clusters.mat'], 'clusters');
+save(['../', name, ' tree/clusters.mat'], 'clusters');

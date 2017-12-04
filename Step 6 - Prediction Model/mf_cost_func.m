@@ -1,4 +1,4 @@
-function [J, grad] = cost_func(obj, Y, R, rank, lambda )
+function [J, grad] = mf_cost_func(obj, Y, R, rank, lambda )
 %   J:      cost
 %   grad:   gradient
     

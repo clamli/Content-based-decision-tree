@@ -21,5 +21,5 @@ disp('mean_all DONE');
 
 decentralized_matrix = decentralized_matrix - repmat(mean_all, 1, itemNum);
 disp('decentralized_matrix DONE');
-save(['data/decentralized_matrix.mat'], 'decentralized_matrix');
+save(['../20m tree/cluster/decentralized_matrix.mat'], 'decentralized_matrix');
 disp('save DONE');
