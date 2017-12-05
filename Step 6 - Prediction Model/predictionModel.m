@@ -4,7 +4,7 @@
 % load item_sim_matrix
 % load test_list
 
-chosenDepth = 2;
+chosenDepth = 3;
 %% Find target node
 % item_cluster_rating_matrix = generateItemClusRMatrix(...
 %     dtmodel.user_cluster,...
