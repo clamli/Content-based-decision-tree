@@ -30,17 +30,24 @@ classdef ContentDecisionTree<handle
         tree_bound;           % Node bound for each level of the tree, Cell
         interval_bound;       % Bound for each node's interval
         user_cluster_id;      % Id of user clusters in the cell
+        global_mean;          % Global mean of ratings
+        UI_matrix_with_item_bias;            % UI rating after minusing Item bias
     end
     
     methods
         function loadUIRatingMatrix(obj)
-            UI_matrix_str = load('./UI_matrix_1_train.mat');
-            obj.UI_matrix = single(full(UI_matrix_str.UI_matrix));
+            UI_matrix_str = load('./UI_matrix_train.mat');
+            obj.UI_matrix = single(full(UI_matrix_str.UI_matrix_train));
             item_num = size(obj.UI_matrix, 2);
-            % user_num = size(obj.UI_matrix, 1);
+            user_num = size(obj.UI_matrix, 1);
             obj.tree = uint32(linspace(1, item_num, item_num));
             obj.tree_bound{obj.cur_depth} = {[1, item_num]};
+            obj.global_mean = sum(sum(obj.UI_matrix)) / sum(sum(obj.UI_matrix~=0));
             % obj.user_id = uint32(linspace(1, user_num, user_num));
+            item_bias = (sum(obj.UI_matrix, 1) + 7*obj.global_mean) ./ (7+sum(obj.UI_matrix~=0, 1));
+            item_bias = repmat(item_bias, user_num, 1);
+            obj.UI_matrix_with_item_bias = obj.UI_matrix - item_bias;
+            clear item_bias;
         end
         function loadSimilarityMatrix(obj)      
             Genre_str = load('./genre_matrix_44480_44480.mat');     % Load Genre Matrix Struct
@@ -73,8 +80,8 @@ classdef ContentDecisionTree<handle
                 obj.alpha_year = param4;
                 obj.loadSimilarityMatrix();
             else
-                similarity_matrix_str = load('item_sim_matrix_31136_31136.mat');
-                obj.item_sim_matrix = similarity_matrix_str.item_sim_matrix_31136_31136;
+                similarity_matrix_str = load('item_sim_matrix_2590_2590.mat');
+                obj.item_sim_matrix = similarity_matrix_str.item_sim_matrix_training;
                 clear similarity_matrix_str;
             end
         end
@@ -85,8 +92,8 @@ classdef ContentDecisionTree<handle
             end
         end
         function loadUserCluster(obj)
-            user_cluster_str = load('./chosen_user_cluster_cell.mat');
-            obj.user_cluster = user_cluster_str.chosen_user_cluster_cell;
+            user_cluster_str = load('./clusters_overlap.mat');
+            obj.user_cluster = user_cluster_str.clusters;
             clear user_cluster_str
             obj.user_cluster_id = uint32(linspace(1, size(obj.user_cluster, 2), size(obj.user_cluster, 2)));
             for i = 1:size(obj.user_cluster, 2)
@@ -102,6 +109,7 @@ classdef ContentDecisionTree<handle
             
             obj.generated_rating_matrix = (obj.UI_matrix(:, :) == 0) .* (obj.UI_matrix(:, :)*obj.item_sim_matrix(:, :));
             obj.generated_rating_matrix = (obj.generated_rating_matrix) ./ ((obj.UI_matrix(:, :) ~= 0) * obj.item_sim_matrix(:, :));
+%             obj.generated_rating_matrix = 0.5*obj.generated_rating_matrix;
             disp('Generated Matrix Done!');
         end
         
@@ -109,7 +117,7 @@ classdef ContentDecisionTree<handle
         
         function generateDecisionTree(obj, tree_bound_for_node, candidate_user_cluster_id, candidate_user_num)
             num_candidate_cluster = size(candidate_user_cluster_id, 2);
-            fprintf('level %d:\n', obj.cur_depth);
+            % fprintf('level %d:\n', obj.cur_depth);
             
             % Termination condition
             obj.cur_depth = obj.cur_depth + 1;
@@ -143,23 +151,23 @@ classdef ContentDecisionTree<handle
             % fprintf('    Calculate score finished!\n');
                
             %% Calculate Error
-            tmp_UI_matrix_in_node = obj.UI_matrix(:, item_in_node);
+            tmp_UI_matrix_in_node = obj.UI_matrix_with_item_bias(:, item_in_node);
             min_error = -1;
             for i = 1:num_candidate_cluster
                 item_average_rating = mean(rating_for_item_in_node(index_cell{i}, :), 1);
-                [afts, ind] = sort(item_average_rating);
+                [~, ind] = sort(item_average_rating);
                 interval1 = item_average_rating(ind(round(size(ind, 2)/3)));
                 interval2 = item_average_rating(ind(round(2*size(ind, 2)/3))); 
                 dislike_array = tmp_UI_matrix_in_node(:, item_average_rating <= interval1);
                 mediocre_array = tmp_UI_matrix_in_node(:, item_average_rating > interval1 & item_average_rating <= interval2);
-                like_array = tmp_UI_matrix_in_node(:, item_average_rating > interval2);
+                like_array = tmp_UI_matrix_in_node(:, item_average_rating > interval2);                
                 error = sum(sum(dislike_array.^2, 2)-(sum(dislike_array, 2).^2)./(sum(dislike_array~=0, 2)+1e-9)) + ...
                     sum(sum(mediocre_array.^2, 2)-(sum(mediocre_array, 2).^2)./(sum(mediocre_array~=0, 2)+1e-9)) + ...
                     sum(sum(like_array.^2, 2)-(sum(like_array, 2).^2)./(sum(like_array~=0, 2)+1e-9));
 %                 fprintf('cluster id: %d\n', i);
 %                 fprintf('index_cell: %d\n', size(index_cell{i}));
 %                 fprintf('%.2f        %.2f\n', error, min_error);
-                fprintf('%d, %d, %d\n', size(dislike_array, 2), size(mediocre_array, 2), size(like_array, 2));
+                % fprintf('%d, %d, %d\n', size(dislike_array, 2), size(mediocre_array, 2), size(like_array, 2));
                 if min_error == -1 || error < min_error
                     min_error = error;
                     min_interval1 = interval1;
