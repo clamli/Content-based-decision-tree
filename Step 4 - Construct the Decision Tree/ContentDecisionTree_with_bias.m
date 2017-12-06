@@ -1,4 +1,4 @@
-classdef ContentDecisionTree<handle
+classdef ContentDecisionTree_with_bias<handle
 
     properties
         % U*I Rating sparse Matrix
@@ -92,8 +92,8 @@ classdef ContentDecisionTree<handle
             end
         end
         function loadUserCluster(obj)
-            user_cluster_str = load('./clusters_overlap.mat');
-            obj.user_cluster = user_cluster_str.clusters;
+            user_cluster_str = load('./sub_user_cluster_cell.mat');
+            obj.user_cluster = user_cluster_str.sub_user_cluster_cell;
             clear user_cluster_str
             obj.user_cluster_id = uint32(linspace(1, size(obj.user_cluster, 2), size(obj.user_cluster, 2)));
             for i = 1:size(obj.user_cluster, 2)
@@ -108,8 +108,7 @@ classdef ContentDecisionTree<handle
             disp('Load User Cluster Done!');
             
             obj.generated_rating_matrix = (obj.UI_matrix(:, :) == 0) .* (obj.UI_matrix(:, :)*obj.item_sim_matrix(:, :));
-            obj.generated_rating_matrix = (obj.generated_rating_matrix) ./ ((obj.UI_matrix(:, :) ~= 0) * obj.item_sim_matrix(:, :));
-%             obj.generated_rating_matrix = 0.5*obj.generated_rating_matrix;
+            obj.generated_rating_matrix = 0.1*(obj.generated_rating_matrix) ./ ((obj.UI_matrix(:, :) ~= 0) * obj.item_sim_matrix(:, :));
             disp('Generated Matrix Done!');
         end
         
@@ -146,6 +145,7 @@ classdef ContentDecisionTree<handle
 %             generated_rating_matrix = (generated_rating_matrix) ./ ((obj.UI_matrix(id_array, :) ~= 0) * obj.item_sim_matrix(:, item_in_node));
             
             rating_for_item_in_node = obj.UI_matrix(id_array, item_in_node) + obj.generated_rating_matrix(id_array, item_in_node);
+            denominator = (obj.UI_matrix(id_array, item_in_node) == 0);
             % clear generated_rating_matrix;
             % save('./rating_for_item_in_node.mat', 'rating_for_item_in_node', '-v7.3');
             % fprintf('    Calculate score finished!\n');
@@ -154,7 +154,8 @@ classdef ContentDecisionTree<handle
             tmp_UI_matrix_in_node = obj.UI_matrix_with_item_bias(:, item_in_node);
             min_error = -1;
             for i = 1:num_candidate_cluster
-                item_average_rating = mean(rating_for_item_in_node(index_cell{i}, :), 1);
+                item_average_rating = sum(rating_for_item_in_node(index_cell{i}, :), 1) ./ sum(0.1*(denominator(index_cell{i}, :)) + (denominator(index_cell{i}, :)==0), 1);
+%                 item_average_rating = mean(rating_for_item_in_node(index_cell{i}, :), 1);
                 [~, ind] = sort(item_average_rating);
                 interval1 = item_average_rating(ind(round(size(ind, 2)/3)));
                 interval2 = item_average_rating(ind(round(2*size(ind, 2)/3))); 
