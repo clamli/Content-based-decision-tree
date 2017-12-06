@@ -7,8 +7,9 @@ function [ item_cluster_rating_matrix ] = generateItemClusRMatrix( user_cluster,
         nominator = (test_UI_matrix(user_cluster{i}, :) * item_sim_matrix(:, :));
         denominator = ((test_UI_matrix(user_cluster{i}, :)~=0) * item_sim_matrix(:, :));
         item_rating_for_one_cluster = test_UI_matrix(user_cluster{i}, :) + ...
-            (test_UI_matrix(user_cluster{i}, :) == 0) .* (nominator ./ denominator);
-        item_cluster_rating_matrix(i, :) = mean(item_rating_for_one_cluster, 1);
+            0.01*(test_UI_matrix(user_cluster{i}, :) == 0) .* (nominator ./ denominator);
+        item_cluster_rating_matrix(i, :) = sum(item_rating_for_one_cluster, 1) ...
+            ./ (sum(0.01*(test_UI_matrix(user_cluster{i}, :)==0), 1) + sum(test_UI_matrix(user_cluster{i}, :)~=0));
     end
 
 end
