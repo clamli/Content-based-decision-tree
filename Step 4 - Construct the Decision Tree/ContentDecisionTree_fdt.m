@@ -32,12 +32,14 @@ classdef ContentDecisionTree_fdt<handle
         user_cluster_id;      % Id of user clusters in the cell
         global_mean;          % Global mean of ratings
         UI_matrix_with_item_bias;            % UI rating after minusing Item bias
+        
+        Aggr_error;
     end
     
     methods
         function loadUIRatingMatrix(obj)
             UI_matrix_str = load('./UI_matrix_train.mat');
-            obj.UI_matrix = single(full(UI_matrix_str.UI_matrix_train));
+            obj.UI_matrix = double(full(UI_matrix_str.UI_matrix_train));
             item_num = size(obj.UI_matrix, 2);
             user_num = size(obj.UI_matrix, 1);
             obj.tree = uint32(linspace(1, item_num, item_num));
@@ -46,7 +48,7 @@ classdef ContentDecisionTree_fdt<handle
             % obj.user_id = uint32(linspace(1, user_num, user_num));
             item_bias = (sum(obj.UI_matrix, 1) + 7*obj.global_mean) ./ (7+sum(obj.UI_matrix~=0, 1));
             item_bias = repmat(item_bias, user_num, 1);
-            obj.UI_matrix_with_item_bias = obj.UI_matrix - item_bias;
+            obj.UI_matrix_with_item_bias = obj.UI_matrix - item_bias.*(obj.UI_matrix~=0);
             clear item_bias;
         end
         function loadSimilarityMatrix(obj)      
@@ -123,11 +125,22 @@ classdef ContentDecisionTree_fdt<handle
             if (obj.cur_depth > obj.depth_threshold) || (num_candidate_cluster == 0)
                 return
             end
+%             
+            item_in_node = obj.tree(tree_bound_for_node(1):tree_bound_for_node(2));
+%             num_of_rating = zeros(1, num_candidate_cluster);
+%             for i = 1:num_candidate_cluster
+%                 userid = obj.user_cluster{candidate_user_cluster_id(i)};
+%                 num_of_rating(i) = sum(sum(obj.UI_matrix(userid, item_in_node)~=0, 2));
+%             end
+%             [after_sort, ind] = sort(num_of_rating, 'descend');
+%             node_num_candidate_cluster = 200;
+%             node_candidate_user_num = 200;
+%             node_candidate_user_cluster_id = candidate_user_cluster_id(ind(1:200));
+%             after_sort_r = after_sort(1:200);
             
             % Calculation Preparation
             id_array = zeros(1, candidate_user_num);
             index_cell = cell(1, num_candidate_cluster);
-            item_in_node = obj.tree(tree_bound_for_node(1):tree_bound_for_node(2));
             front = 1;
             for i = 1:num_candidate_cluster
                 userid = obj.user_cluster{candidate_user_cluster_id(i)};
@@ -136,34 +149,31 @@ classdef ContentDecisionTree_fdt<handle
                 id_array(front:rear) = userid;
                 front = rear + 1;
             end
-            %fprintf('    Preparation finished!\n');
-            
-            %% Calculate Score            
-%             % Generated Rating Matrix
-%             generated_rating_matrix = (obj.UI_matrix(id_array, item_in_node) == 0) .* (obj.UI_matrix(id_array, :)*obj.item_sim_matrix(:, item_in_node));
-%             % generated_rating_matrix = (generated_rating_matrix' / diag(sum(obj.UI_matrix(id_array, :) ~= 0, 2)))';
-%             generated_rating_matrix = (generated_rating_matrix) ./ ((obj.UI_matrix(id_array, :) ~= 0) * obj.item_sim_matrix(:, item_in_node));
+          
             
             rating_for_item_in_node = obj.UI_matrix(id_array, item_in_node);
-            % clear generated_rating_matrix;
-            % save('./rating_for_item_in_node.mat', 'rating_for_item_in_node', '-v7.3');
-            % fprintf('    Calculate score finished!\n');
-               
+%             disp('node_candidate_user_cluster_id:');
+%             disp(node_candidate_user_cluster_id);
+            
             %% Calculate Error
             tmp_UI_matrix_in_node = obj.UI_matrix_with_item_bias(:, item_in_node);
             min_error = -1;
+            id_array_err = cell(1, num_candidate_cluster);
             for i = 1:num_candidate_cluster
-                item_average_rating = sum(rating_for_item_in_node(index_cell{i}, :), 1) ./ (sum((rating_for_item_in_node(index_cell{i}, :)~=0), 1)+1e-9);
-                dislike_array = tmp_UI_matrix_in_node(:, item_average_rating <= 3 & item_average_rating > 0);
-                mediocre_array = tmp_UI_matrix_in_node(:, item_average_rating > 3 & item_average_rating <= 5);
+                item_average_rating = sum(rating_for_item_in_node(index_cell{i}, :), 1);
+                dislike_array = tmp_UI_matrix_in_node(:, item_average_rating > 3 & item_average_rating <= 5);
+                mediocre_array = tmp_UI_matrix_in_node(:, item_average_rating <= 3 & item_average_rating > 0);
                 like_array = tmp_UI_matrix_in_node(:, item_average_rating == 0);                
                 error = sum(sum(dislike_array.^2, 2)-(sum(dislike_array, 2).^2)./(sum(dislike_array~=0, 2)+1e-9)) + ...
                     sum(sum(mediocre_array.^2, 2)-(sum(mediocre_array, 2).^2)./(sum(mediocre_array~=0, 2)+1e-9)) + ...
                     sum(sum(like_array.^2, 2)-(sum(like_array, 2).^2)./(sum(like_array~=0, 2)+1e-9));
+                %disp(class(error));
 %                 fprintf('cluster id: %d\n', i);
 %                 fprintf('index_cell: %d\n', size(index_cell{i}));
-%                 fprintf('%.2f        %.2f\n', error, min_error);
+                % fprintf('%.2f\n', error);
                 % fprintf('%d, %d, %d\n', size(dislike_array, 2), size(mediocre_array, 2), size(like_array, 2));
+                %disp(item_average_rating);
+                id_array_err{i} = [candidate_user_cluster_id(i), error];
                 if min_error == -1 || error < min_error
                     min_error = error;
                     min_usr_cluster_id = i;
@@ -172,6 +182,10 @@ classdef ContentDecisionTree_fdt<handle
             end
             clear tmp_UI_matrix_in_node;
             %fprintf('    Calculate error finished!\n');
+%             if obj.cur_depth == 6 && if size(obj.tree_bound, 2) < obj.cur_depth
+%                 Aggr_error
+%                 save('id_array_err.mat', 'id_array_err', '-v7.3');
+%             end
             clear rating_for_item_in_node;
             clear item_average_rating;
             
@@ -179,8 +193,8 @@ classdef ContentDecisionTree_fdt<handle
             %% Assign Children Node
             %disp(min_item_average_rating);
             %disp(size(item_in_node));
-            dislike_array = item_in_node(min_item_average_rating <= 3 & min_item_average_rating > 0);
-            mediocre_array = item_in_node(min_item_average_rating > 3 & min_item_average_rating <= 5);
+            dislike_array = item_in_node(min_item_average_rating > 3 & min_item_average_rating <= 5);
+            mediocre_array = item_in_node(min_item_average_rating <= 3 & min_item_average_rating > 0);
             like_array = item_in_node(min_item_average_rating == 0);
 %             disp(size(obj.tree(tree_bound_for_node(1):tree_bound_for_node(2))));
 %             disp(size(dislike_array));
