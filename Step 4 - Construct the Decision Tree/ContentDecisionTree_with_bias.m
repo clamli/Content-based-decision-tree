@@ -46,7 +46,7 @@ classdef ContentDecisionTree_with_bias<handle
             % obj.user_id = uint32(linspace(1, user_num, user_num));
             item_bias = (sum(obj.UI_matrix, 1) + 7*obj.global_mean) ./ (7+sum(obj.UI_matrix~=0, 1));
             item_bias = repmat(item_bias, user_num, 1);
-            obj.UI_matrix_with_item_bias = obj.UI_matrix - item_bias;
+            obj.UI_matrix_with_item_bias = obj.UI_matrix - item_bias.*(obj.UI_matrix~=0);
             clear item_bias;
         end
         function loadSimilarityMatrix(obj)      
@@ -92,8 +92,8 @@ classdef ContentDecisionTree_with_bias<handle
             end
         end
         function loadUserCluster(obj)
-            user_cluster_str = load('./sub_user_cluster_cell.mat');
-            obj.user_cluster = user_cluster_str.sub_user_cluster_cell;
+            user_cluster_str = load('./clusters.mat');
+            obj.user_cluster = user_cluster_str.clusters;
             clear user_cluster_str
             obj.user_cluster_id = uint32(linspace(1, size(obj.user_cluster, 2), size(obj.user_cluster, 2)));
             for i = 1:size(obj.user_cluster, 2)
@@ -108,7 +108,7 @@ classdef ContentDecisionTree_with_bias<handle
             disp('Load User Cluster Done!');
             
             obj.generated_rating_matrix = (obj.UI_matrix(:, :) == 0) .* (obj.UI_matrix(:, :)*obj.item_sim_matrix(:, :));
-            obj.generated_rating_matrix = 0.1*(obj.generated_rating_matrix) ./ ((obj.UI_matrix(:, :) ~= 0) * obj.item_sim_matrix(:, :));
+            obj.generated_rating_matrix = 0.01*(obj.generated_rating_matrix) ./ ((obj.UI_matrix(:, :) ~= 0) * obj.item_sim_matrix(:, :));
             disp('Generated Matrix Done!');
         end
         
@@ -154,11 +154,13 @@ classdef ContentDecisionTree_with_bias<handle
             tmp_UI_matrix_in_node = obj.UI_matrix_with_item_bias(:, item_in_node);
             min_error = -1;
             for i = 1:num_candidate_cluster
-                item_average_rating = sum(rating_for_item_in_node(index_cell{i}, :), 1) ./ sum(0.1*(denominator(index_cell{i}, :)) + (denominator(index_cell{i}, :)==0), 1);
+                item_average_rating = sum(rating_for_item_in_node(index_cell{i}, :), 1) ./ sum(0.01*(denominator(index_cell{i}, :)) + (denominator(index_cell{i}, :)==0), 1);
 %                 item_average_rating = mean(rating_for_item_in_node(index_cell{i}, :), 1);
-                [~, ind] = sort(item_average_rating);
-                interval1 = item_average_rating(ind(round(size(ind, 2)/3)));
-                interval2 = item_average_rating(ind(round(2*size(ind, 2)/3))); 
+%                 [~, ind] = sort(item_average_rating);
+%                 interval1 = item_average_rating(ind(round(size(ind, 2)/3)));
+%                 interval2 = item_average_rating(ind(round(2*size(ind, 2)/3))); 
+                interval1 = 3.4;
+                interval2 = 3.6;
                 dislike_array = tmp_UI_matrix_in_node(:, item_average_rating <= interval1);
                 mediocre_array = tmp_UI_matrix_in_node(:, item_average_rating > interval1 & item_average_rating <= interval2);
                 like_array = tmp_UI_matrix_in_node(:, item_average_rating > interval2);                
