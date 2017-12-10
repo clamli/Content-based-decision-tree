@@ -92,7 +92,7 @@ classdef ContentDecisionTree_with_bias<handle
             end
         end
         function loadUserCluster(obj)
-            user_cluster_str = load('./clusters.mat');
+            user_cluster_str = load('./clusters_overlap.mat');
             obj.user_cluster = user_cluster_str.clusters;
             clear user_cluster_str
             obj.user_cluster_id = uint32(linspace(1, size(obj.user_cluster, 2), size(obj.user_cluster, 2)));
@@ -156,11 +156,9 @@ classdef ContentDecisionTree_with_bias<handle
             for i = 1:num_candidate_cluster
                 item_average_rating = sum(rating_for_item_in_node(index_cell{i}, :), 1) ./ sum(0.01*(denominator(index_cell{i}, :)) + (denominator(index_cell{i}, :)==0), 1);
 %                 item_average_rating = mean(rating_for_item_in_node(index_cell{i}, :), 1);
-%                 [~, ind] = sort(item_average_rating);
-%                 interval1 = item_average_rating(ind(round(size(ind, 2)/3)));
-%                 interval2 = item_average_rating(ind(round(2*size(ind, 2)/3))); 
-                interval1 = 3.4;
-                interval2 = 3.6;
+                [~, ind] = sort(item_average_rating);
+                interval1 = item_average_rating(ind(round(size(ind, 2)/3)));
+                interval2 = item_average_rating(ind(round(2*size(ind, 2)/3))); 
                 dislike_array = tmp_UI_matrix_in_node(:, item_average_rating <= interval1);
                 mediocre_array = tmp_UI_matrix_in_node(:, item_average_rating > interval1 & item_average_rating <= interval2);
                 like_array = tmp_UI_matrix_in_node(:, item_average_rating > interval2);                
