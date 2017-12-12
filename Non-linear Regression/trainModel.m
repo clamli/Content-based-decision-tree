@@ -1,4 +1,4 @@
-name = '20m';
+name = '1m';
 
 A_title = load(['data/', name, '/title.mat']);
 A_title = A_title.title;
@@ -34,10 +34,19 @@ mdl = fitnlm(tbl,modelfun,beta0)
 x = [A_title, A_tag, A_year, A_genre,...
             B_title, B_tag, B_year, B_genre, realRatings];
 params = table2array(mdl.Coefficients(:,1));
-save(['data/', name, '/params.mat'], 'params');
+save(['data/', name, '/params_3.mat'], 'params');
 modelfun = (params(1).*x(:,1) + params(2).*x(:,2) +  params(3).*x(:,3) +  params(4).*x(:,4))...
                                      ./...
                  (params(1).*x(:,5) + params(2).*x(:,6) +  params(3).*x(:,7) +  params(4).*x(:,8));
 rmse = (sum((realRatings - modelfun).^2)/length(realRatings)).^0.5
 
 %% Generate resulting 
+%% load
+% load four feature similarity
+% load params
+%%
+item_sim_matrix = params(1) * title_matrix +...
+             params(2) * tag_matrix +...
+             params(3) * year_matrix +...
+             params(4) * genre_matrix;
+save(['../', name, ' tree/item_sim_matrix_3.mat'], 'item_sim_matrix')

@@ -5,18 +5,29 @@
 % load test_list & test_list
 
 %% Options
-RMSE_without_queried_ratings_mode = 0;
-MF_with_score_mode = 0;
+% Traditional FDT model without score, using like dislike & unknown interval
 FDT_mode = 1;
+% Traditional FDT MF contruction method. Build MF on each level
 Multiple_MF_mode = 1;
-Spark_MF_mode = 1;
-Outload_mode = 1;
+% Use Prediction provided by Spark from python
+Spark_MF_mode = 0;
+% Outload pseudo_matrix for Spark to train MF
+Outload_mode = 0;
+% Test FDT tree built by python with MATLAB MF function
+Python_FDT_mode = 0;
+% Train MF with score
+MF_with_score_mode = 0;
+% Calculate RMSE without ratings obtained from query process.
+RMSE_without_queried_ratings_mode = 1;
 
-%% Execute once
+%%	Pre-process
+weight = 0.01;
 totalDepth = length(dtmodel.tree_bound);
-item_cluster_rating_matrix = generateItemClusRMatrix(...
+[user_num, item_num_test] = size(UI_matrix_test);
+
+cluster_matrix = generateItemClusRMatrix(...
     FDT_mode, dtmodel.user_cluster,...
-    item_sim_matrix(test_list, test_list),...
+    item_sim_matrix(test_list, test_list), weight,...
     single(full(UI_matrix_test)));
 prediction_model = cell(2, totalDepth);
 if Multiple_MF_mode
@@ -28,31 +39,23 @@ if Multiple_MF_mode
                 pseudo_items = [pseudo_items; all_nodes{i}];
             end
         end
-        prediction_model{1, Depth} = cell(size(pseudo_items, 1), 1);
-        for i = 1 : size(pseudo_items, 1)
+        pseudo_itemNum = size(pseudo_items, 1);
+        prediction_model{1, Depth} = cell(pseudo_itemNum, 1);
+        for i = 1 : pseudo_itemNum
            prediction_model{1, Depth}{i, 1} =  pseudo_items(i, :);
         end
     end
 end
-lambdas = [0.005, 0.01,  0.02,  0.04,  0.08, ...
-           0.16,  0.32,  0.64,  1.28,  2.56, ...
-           5.12, 10.24, 20.48, 40.96, 81.92];
+lambdas =... %[0, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256];%     [0.001 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009];
+[0.005, 0.01,  0.02, ...
+0.04,  0.08, 0.16, ...
+0.32,  0.64,  1.28];%, ...
+% 2.56, 5.12, 10.24,...
+% 20.48, 40.96, 81.92];
 error_rate = zeros(length(lambdas), totalDepth);
-for chosenDepth = 1 : totalDepth; 
-    %% Find target node
-    if FDT_mode
-        interval_bound = [];
-    else
-        interval_bound = {dtmodel.interval_bound{1:chosenDepth - 1}};
-    end
-    [targetNodes, UI_matrix_test_queried] = ...
-         getTargetNode(...
-             RMSE_without_queried_ratings_mode, dtmodel.user_cluster,...
-             UI_matrix_test, item_cluster_rating_matrix,...
-             {dtmodel.split_cluster{1:chosenDepth - 1}},...
-             {dtmodel.tree_bound{1:chosenDepth}}, ...
-             interval_bound, FDT_mode);
 
+for chosenDepth = 1:totalDepth
+    disp(['Current depth: ', num2str(chosenDepth)])
     %% Get Leaf nodes of Decision Tree
     if Multiple_MF_mode
         pseudo_items = prediction_model{1, chosenDepth};
@@ -65,9 +68,9 @@ for chosenDepth = 1 : totalDepth;
         %% Use score or real rating to train MF
         UI_matrix_train = single(full(UI_matrix_train));
         score_matrix_train = (UI_matrix_train == 0)...
-            .* (UI_matrix_train * item_sim_matrix(train_list, train_list));
-        score_matrix_train = (score_matrix_train) ./ ...
-            ((UI_matrix_train ~= 0) * item_sim_matrix(train_list, train_list));
+            .* (UI_matrix_train       * item_sim_matrix(train_list, train_list));
+        score_matrix_train = UI_matrix_train + score_matrix_train ./ ...
+              ((UI_matrix_train ~= 0) * item_sim_matrix(train_list, train_list));
         [pseudo_matrix, pseudo_items] = getPseudo_matrix(...
                             pseudo_items, score_matrix_train); 
     else
@@ -76,25 +79,59 @@ for chosenDepth = 1 : totalDepth;
     end
     if Multiple_MF_mode
         prediction_model{1, chosenDepth} = pseudo_items;
-    end
+    end    
     if Outload_mode
         pseudo_matrix = single(full(pseudo_matrix));
+        for m = 1:length(dtmodel.tree_bound{chosenDepth})
+            interval = dtmodel.tree_bound{chosenDepth}{m};
+            if interval(1) > interval(2)
+                pseudo_matrix = [pseudo_matrix(:,1:m - 1), zeros(user_num,1), pseudo_matrix(:,m:end)];
+            end
+        end        
         save(['pseudo_matrix_', num2str(chosenDepth) ,'.mat'], 'pseudo_matrix');
         continue
     end
-    %% Train reg param 
-    UI_matrix_test_queried = single(full(UI_matrix_test_queried));
-    [user_num, item_num_test] = size(UI_matrix_test_queried);
+    
+    %% Find target node
+    if FDT_mode
+        interval_bound = [];
+    else
+        interval_bound = {dtmodel.interval_bound{1:chosenDepth - 1}};
+    end
+    
+    if Python_FDT_mode
+        load(['Python_FDT/pseudo_rating_matrix_', num2str(chosenDepth  -1), '.mat']); 
+        load(['Python_FDT/target_node_', num2str(chosenDepth), '.mat']); 
+        targetNodes_test = target_node;
+        chosen_train = pseudo_rating_matrix;
+        chosen_test  = single(full(UI_matrix_test));
+    else
+        [targetNodes_test, UI_matrix_test_queried] = getTargetNode(...
+             RMSE_without_queried_ratings_mode, dtmodel.user_cluster,...
+             UI_matrix_test, cluster_matrix,...
+             {dtmodel.split_cluster{1 : chosenDepth - 1}},...
+             {dtmodel.tree_bound{1 : chosenDepth}}, ...
+             interval_bound, FDT_mode);
+%         targetNode = zeros(item_num_test, 2);
+%         for i = 1 : item_num_test
+%             targetNode(i, :) = targetNodes_test{i} - 1;
+%         end
+%         save(['targetNode_', num2str(chosenDepth), '.mat'], 'targetNode')
+%         continue
+        chosen_train = pseudo_matrix;
+        chosen_test  = single(full(UI_matrix_test_queried));
+    end
+   %% Train reg param     
     P_list = cell(1, length(lambdas));
     for i = 1 : length(lambdas)
         %% Generate MF Model
         lambda = lambdas(i);    
-        rank = 100;
+        rank = 10;
         disp('MF start:')
-        chosen_train = pseudo_matrix;
-        chosen_test  = UI_matrix_test_queried;
         if Spark_MF_mode
-%             P = P_results{};
+            P_id = (chosenDepth - 1) * length(lambdas) + i - 1;
+            load(['MF_result/MF_result_', num2str(P_id), '.mat']);
+            P = MF_result;         
         else
             P = mf_resys_func(chosen_train, chosen_train~=0, rank, lambda);
         end
@@ -105,15 +142,21 @@ for chosenDepth = 1 : totalDepth;
         %% Calculate RMSE on Test Set
         P_test = single(zeros(size(chosen_test)));
         for j = 1 : item_num_test
-            level = targetNodes{j}(1);
-            nodeId = targetNodes{j}(2);
-            pseudo_item = dtmodel.tree_bound{level}(nodeId);
-            if Multiple_MF_mode
-                m = find(ismember(prediction_model{1, level}, num2str(pseudo_item{1})));
-                P_test(:, j) = prediction_model{2, level}(:, m);
+            if Python_FDT_mode
+                level = targetNodes_test(j, 1);
+                nodeId = targetNodes_test(j, 2);  
+                P_test(:, j) = prediction_model{2, level}(:, nodeId);
             else
-                m = find(ismember(pseudo_items, num2str(pseudo_item{1})));
-                P_test(:, j) = P(:, m);
+                level = targetNodes_test{j}(1);
+                nodeId = targetNodes_test{j}(2);
+                pseudo_item = dtmodel.tree_bound{level}(nodeId);                
+                if Multiple_MF_mode
+                    m = find(ismember(prediction_model{1, level}, num2str(pseudo_item{1})));
+                    P_test(:, j) = prediction_model{2, level}(:, m);
+                else
+                    m = find(ismember(pseudo_items, num2str(pseudo_item{1})));
+                    P_test(:, j) = P(:, m);
+                end
             end
         end
         P_test = P_test .* (chosen_test~=0);

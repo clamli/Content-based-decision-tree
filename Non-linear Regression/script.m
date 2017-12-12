@@ -1,10 +1,8 @@
 %% Load
 % load four feature similarity matrix
-% load full sparse rating matrix
-% For large dataset, pick 10% users here.
-% For 1m dataset, pick all the users
+% load UI_matrix_train
 UI_matrix = UI_matrix_train;
-name = '20m';
+name = '1m';
 %%
 title = [];
 title_den = [];
@@ -55,15 +53,15 @@ for i = 1:10
     disp('genre done!')
 
     %% real rating
-    UI_matrix_test = UI_matrix_chosen(:, test);
-    real_rating = [real_rating; UI_matrix_test(UI_matrix_test~=0)];
+    UI_matrix_validation = UI_matrix_chosen(:, test);
+    real_rating = [real_rating; UI_matrix_validation(UI_matrix_validation~=0)];
     disp('real rating done!')
     
     startPos = endPos + 1;
     if i == 9        
-        endPos = userNum;
+        endPos = itemNum;
     else
-        endPos = endPos + int32(userNum*0.1);
+        endPos = endPos + int32(itemNum*0.1);
     end
 end
 

@@ -7,7 +7,7 @@ function [ P, user_vectors ] = mf_resys_func( Y, R, rank, lambda)
     user_vectors = randn(user_num, rank);
     init_val = [item_vectors(:); user_vectors(:)];
 
-    maxiter = 200;
+    maxiter = 300;
 
     options = optimset('GradObj', 'on', 'MaxIter', maxiter);
     tic;
