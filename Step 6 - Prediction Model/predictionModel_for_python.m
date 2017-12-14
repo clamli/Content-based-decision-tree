@@ -15,7 +15,15 @@ MF_with_score_mode = 0;
 RMSE_without_queried_ratings_mode = 1;
 % Weight of score
 weight = 0.01;
-
+% Index of user subset
+subsetNum = 6;
+% Dataset selected
+name = '20m';
+if name == '20m'
+    subset_userNum = 13849;
+else
+    subset_userNum = 2014;
+end
 %% Outload dtmodel file
 tree = dtmodel.tree;
 lr_bound = cell(1, length(dtmodel.tree_bound));
@@ -91,6 +99,13 @@ for chosenDepth = 1:totalDepth
          {dtmodel.split_cluster{1 : chosenDepth - 1}},...
          {dtmodel.tree_bound{1 : chosenDepth}}, ...
          interval_bound, FDT_mode);
+    for i = 1 : length(rated_user)
+        if rated_user{i} ~=[]
+            for j = 1:length(rated_user{i})
+                rated_user{i}(j) = rated_user{i}(j) + (subsetNum - 1) * subset_userNum;
+            end
+        end
+    end
     save(['treeFile/targetNode_', num2str(chosenDepth), '.mat'], 'targetNode')
     save(['treeFile/rated_user_', num2str(chosenDepth), '.mat'], 'rated_user')
 end
