@@ -36,7 +36,7 @@ classdef ContentDecisionTree_with_bias<handle
     
     methods
         function loadUIRatingMatrix(obj)
-            UI_matrix_str = load('./UI_matrix_train.mat');
+            UI_matrix_str = load('./UI_matrix_s1_train.mat');
             obj.UI_matrix = single(full(UI_matrix_str.UI_matrix_train));
             item_num = size(obj.UI_matrix, 2);
             user_num = size(obj.UI_matrix, 1);
@@ -80,7 +80,7 @@ classdef ContentDecisionTree_with_bias<handle
                 obj.alpha_year = param4;
                 obj.loadSimilarityMatrix();
             else
-                similarity_matrix_str = load('item_sim_matrix_2590_2590.mat');
+                similarity_matrix_str = load('item_sim_matrix_training.mat');
                 obj.item_sim_matrix = similarity_matrix_str.item_sim_matrix_training;
                 clear similarity_matrix_str;
             end
@@ -92,7 +92,7 @@ classdef ContentDecisionTree_with_bias<handle
             end
         end
         function loadUserCluster(obj)
-            user_cluster_str = load('./clusters_overlap.mat');
+            user_cluster_str = load('./clusters.mat');
             obj.user_cluster = user_cluster_str.clusters;
             clear user_cluster_str
             obj.user_cluster_id = uint32(linspace(1, size(obj.user_cluster, 2), size(obj.user_cluster, 2)));
@@ -151,7 +151,7 @@ classdef ContentDecisionTree_with_bias<handle
             % fprintf('    Calculate score finished!\n');
                
             %% Calculate Error
-            tmp_UI_matrix_in_node = obj.UI_matrix_with_item_bias(:, item_in_node);
+            tmp_UI_matrix_in_node = obj.UI_matrix(:, item_in_node);
             min_error = -1;
             for i = 1:num_candidate_cluster
                 item_average_rating = sum(rating_for_item_in_node(index_cell{i}, :), 1) ./ sum(0.01*(denominator(index_cell{i}, :)) + (denominator(index_cell{i}, :)==0), 1);

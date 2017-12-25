@@ -2,7 +2,7 @@
 % UI_matrix_train 
 
 %% Pre-calculate distance matrix
-name = '1m';
+name = '20m';
 distance = dist_overlap(UI_matrix_train);
 
 %% eliminate users with zero ratings within training set
@@ -24,4 +24,4 @@ for i = 1:length(clusters)
 end
 
 %% Save to file
-save(['../', name, ' tree/clusters.mat'], 'clusters');
+save('clusters.mat', 'clusters');

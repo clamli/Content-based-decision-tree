@@ -16,10 +16,10 @@ RMSE_without_queried_ratings_mode = 1;
 % Weight of score
 weight = 0.01;
 % Index of user subset
-subsetNum = 6;
+subsetNum = 1;
 % Dataset selected
-name = '20m';
-if name == '20m'
+name = '1m';
+if strcmp(name, '20m')
     subset_userNum = 13849;
 else
     subset_userNum = 2014;
@@ -100,7 +100,7 @@ for chosenDepth = 1:totalDepth
          {dtmodel.tree_bound{1 : chosenDepth}}, ...
          interval_bound, FDT_mode);
     for i = 1 : length(rated_user)
-        if rated_user{i} ~=[]
+        if ~isempty(rated_user{i})
             for j = 1:length(rated_user{i})
                 rated_user{i}(j) = rated_user{i}(j) + (subsetNum - 1) * subset_userNum;
             end
